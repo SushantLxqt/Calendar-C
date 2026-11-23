@@ -139,10 +139,7 @@ int main(int argc, char *argv[]){
     char *months[13] = {"JANUARY", "FEBRUARY","MARCH","APRIL", "MAY", "JUNE", "JULY",
                         "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"};
 
-    // For Year        
-    if(argc == 2 && strcmp(argv[1],"2026") == 0){
-        printf("%s\n", argv[1]);
-    }
+    
     // To print the Current Month and its Days 
     if(argc == 1){
         int year = date->tm_year + 1900;
@@ -161,6 +158,7 @@ int main(int argc, char *argv[]){
     }
     // Test the argument pass
     if(argc == 2 && strcmp(argv[1],"2026") != 0){
+        printf("%s\n", argv[1]);
         enum Month_Num month = 0;
 
         parse_month(argv[1], &month);
