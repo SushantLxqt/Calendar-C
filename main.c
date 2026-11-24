@@ -1,6 +1,7 @@
 // Unfinished Work -> Time Taking
 #include <stdio.h>
 #include <time.h>
+#include <ctype.h> // Capitilization
 #include <string.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -71,23 +72,31 @@ void parse_month(const char *name, enum Month_Num *month){
 // Get days of a month of a year
 void get_month_days(int month, int year, int today){
     struct tm data = {0};
+
+    // Get the last day of the month
     data.tm_year = year - 1900;
-    data.tm_mon = month - 1;
+    data.tm_mon = month;  // Next month
     data.tm_mday = 0;
+
     mktime(&data);
 
     int days = data.tm_mday;
 
     // Get the first weekday of the month
+    data.tm_year = year - 1900;
+    data.tm_mon = month - 1;
     data.tm_mday = 1;
+
     mktime(&data);
+
     int first_day = data.tm_wday;
 
-    // Print the days
+    // Print spaces before the first day
     for(int k = 0; k < first_day; k++){
         printf("   ");
     }
 
+    // Print the days
     for(int k = 1; k <= days; k++){
         if(k == today){
             printf("\033[7m%2d\033[0m ", k);
@@ -113,14 +122,31 @@ void get_first_weekday(int month, int year){
     printf("%d\n", data.tm_wday);
 
 }
-
-// To print all the Months and days of a year ( argv[1] )
+// Only works for n -> 1900 <= x >= 2026
 int get_everything_year(int year){
-    
+
+    const char *months[] = {
+        "JANUARY", "FEBRUARY", "MARCH", "APRIL",
+        "MAY", "JUNE", "JULY", "AUGUST",
+        "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+    };
+
+    for(int i = 0; i < 12; i++){
+
+        // Print month name and year
+        printf("\n        %s %d\n", months[i], year);
+
+        // Print weekday headings
+        printf("SU MO TU WE TH FR SA\n");
+
+        // Print the days of that month
+        get_month_days(i + 1, year, 0);
+
+        printf("\n");
+    }
 
     return 0;
 }
-
 int calendar(char *month){
     char buffer[100];
     time_t now = time(NULL);
@@ -156,9 +182,42 @@ int main(int argc, char *argv[]){
         parse_month(month_pl, &months);
         get_month_days(months, year, day);
     }
-    // Test the argument pass
+    // With an Arugment Passed
     if(argc == 2 && strcmp(argv[1],"2026") != 0){
-        printf("%s\n", argv[1]);
+        // For us to print the whole year
+        char *end;
+        long number = strtol(argv[1], &end, 10);
+        // Check either the arg is year or not
+        if(argv[1][0] != '\0' && *end == '\0'){
+            if(number >= 1900 && number <= 9999){
+                get_everything_year((int)number); // Type casting was needed
+            }else{
+                printf("INVALID YEAR\n");
+                return 1;
+            }
+        }else{ 
+            // Capitalize the argument
+            for(int i =0;argv[1][i]!='\0';++i){
+                argv[1][i] = (char)toupper((unsigned char) argv[1][i]);
+            }
+            // store
+            int seen = 0;
+            for(int k=0;k<12; k++){
+                if(strncmp(argv[1], months[k], 3) == 0){
+                    if(strlen(argv[1]) == 3 || strcmp(argv[1], months[k]) == 0){
+                        printf("   %s 2026\n ", months[k]);
+                        seen = 1;
+                        break;
+                    }
+                }
+            }
+            // either the argument needs to be 3 char or the whole month otherwise no
+            if(!seen){
+                printf("Usage : 3 char of Month or Full Month\n");
+                return 1;
+            }
+        }
+
         enum Month_Num month = 0;
 
         parse_month(argv[1], &month);
